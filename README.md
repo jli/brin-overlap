@@ -17,7 +17,9 @@ The shell script `export_brin_items.sh` runs the above query, incrementing the p
 
 ### Parse and render output
 
-TODO: write the rest
+```shell
+python3 broviz.py -i brin_export_full.csv -o broviz_$(date "+%Y%m%d_%H%M%S").svg
+```
 
 
 ## reference
