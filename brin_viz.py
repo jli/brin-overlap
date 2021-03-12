@@ -1,4 +1,5 @@
 #%%
+from datetime import datetime
 from typing import Optional
 
 import drawSvg as draw
@@ -13,7 +14,8 @@ DEFAULT_BLOCK_HEIGHT = 8
 DEFAULT_COLORMAP = "cool"
 HGAP = 2  # gap between blocks on the same level
 VGAP = 2  # gap between levels
-CANVAS_MARGIN = 15
+CANVAS_MARGIN = 20
+DATE_FONT_SIZE = 8
 
 
 def svg(
@@ -43,10 +45,13 @@ def svg(
         )
     )
 
-    def xywh(br: BlockRange, num_level: int) -> tuple[float, float, float, float]:
+    def interpx(dt: datetime) -> float:
         val_range = bro.max_val - bro.min_val
-        x = (br.start - bro.min_val) / val_range * canvas_width
-        w = (br.end - bro.min_val) / val_range * canvas_width - x
+        return (dt - bro.min_val) / val_range * canvas_width
+
+    def xywh(br: BlockRange, num_level: int) -> tuple[float, float, float, float]:
+        x = interpx(br.start)
+        w = interpx(br.end) - x
         y = num_level * block_height
         h = block_height
         # w can be < HGAP when there are many blocks / insufficient canvas
@@ -68,7 +73,28 @@ def svg(
             r = draw.Rectangle(*xywh(br, num_level), fill=color, stroke="black")
             d.append(r)
 
+    # draw time ticks
+    for dt in datetime_range(bro.min_val, bro.max_val, 10):
+        text = [dt.strftime("%Y-%m-%d"), dt.strftime("%H:%M")]
+        x = interpx(dt) + CANVAS_MARGIN
+        # x - 18 to center under tick (hack)
+        # y = font size because multi-line string.
+        d.append(draw.Text(text, DATE_FONT_SIZE, x - 18, DATE_FONT_SIZE))
+        # -7 is magic number (hack)
+        d.append(draw.Line(x, CANVAS_MARGIN, x, CANVAS_MARGIN - 7, stroke='black'))
+
     if outfile:
         print(f"saving to {outfile}")
         d.saveSvg(outfile)
     return d
+
+
+def datetime_range(start: datetime, end: datetime, num_points: int) -> list[datetime]:
+    total_span = end - start
+    interval_span = total_span / (num_points - 1)
+    ptr = start
+    res = []
+    for _ in range(1, num_points + 1):
+        res.append(ptr)
+        ptr += interval_span
+    return res
