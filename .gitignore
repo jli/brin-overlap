@@ -2,7 +2,11 @@
 *.svg
 *.csv
 *.png
+tmp/
 
+
+# no DS store ignoring, github? bah.
+.DS_Store
 
 ### github defaults for python: 
 
