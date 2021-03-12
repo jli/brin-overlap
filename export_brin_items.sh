@@ -15,10 +15,12 @@ echo "=> connecting to host $PGHOST db $PGDB as $PGUSER."
 echo "=> exporting attname $ATTNUM from $PGIDX to $OUTFILE."
 
 function load_extension {
-    psql -h "$PGHOST" -d "$PGDB" -U "$PGUSER" -X -c "CREATE EXTENSION pageinspect"
+    # if fails, most likely because it was already loaded
+    psql -h "$PGHOST" -d "$PGDB" -U "$PGUSER" -X -c "CREATE EXTENSION pageinspect" || true
 }
 
 function unload_extension {
+    echo "-> unloading pageinspect..."
     psql -h "$PGHOST" -d "$PGDB" -U "$PGUSER" -X -c "DROP EXTENSION pageinspect"
 }
 
@@ -39,11 +41,11 @@ function export_page {
     PAGE_OUTFILE="$tmp/brin_export_$PAGE.csv"
     # if attnum is set to -1, we export all columns
     if [ "$ATTNUM" == -1 ]; then
-        COLS="blknum, attnum, value"
+        COLS="blknum,attnum,value"
         WHERE=""
-        ORDER_COLS="blknum, attnum"
+        ORDER_COLS="blknum,attnum"
     else
-        COLS="blknum, value"
+        COLS="blknum,value"
         WHERE="WHERE attnum=$ATTNUM"
         ORDER_COLS="blknum"
     fi
@@ -84,10 +86,7 @@ while true; do
     ((++page))
 done
 
-echo "-> unloading pageinspect..."
-unload_extension
-
 echo "-> concatenating csvs..."
-(echo "blknum,value"; cat "$tmp"/*.csv) > "$OUTFILE"
+(echo "$COLS"; cat "$tmp"/*.csv) > "$OUTFILE"
 
 echo "=> result in $OUTFILE ✨"
