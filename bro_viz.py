@@ -5,8 +5,8 @@
 import argparse
 import logging
 
-from brin_overlap import BrinOverlap, compute_overlap
-from brin_parser import parse_csv_rows
+from brin_overlap import compute_overlap, read_overlap_file
+from brin_parser import parse_csv_file
 from brin_viz import DEFAULT_CANVAS_WIDTH, DEFAULT_COLORMAP, svg
 
 
@@ -15,14 +15,12 @@ def main(args):
 
     if args.input.lower().endswith("csv"):
         logging.info("reading input CSV...")
-        with open(args.input) as f:
-            block_ranges = parse_csv_rows(f)
+        block_ranges = parse_csv_file(args.input)
         logging.info("computing overlap...")
         brin_overlap = compute_overlap(block_ranges)
     elif args.input.lower().endswith("json"):
         logging.info("reading input JSON...")
-        with open(args.input) as f:
-            brin_overlap = BrinOverlap.from_json(f.read())  # type: ignore
+        brin_overlap = read_overlap_file(args.input)
     else:
         raise ValueError(f"-i input file <{args.input}> must be csv or json")
 

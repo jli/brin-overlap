@@ -23,6 +23,11 @@ class BrinOverlap:
     levels: list[list[BlockRange]]
 
 
+def read_overlap_file(filepath: str) -> BrinOverlap:
+    with open(filepath) as f:
+        return BrinOverlap.from_json(f.read())  # type: ignore
+
+
 def fits_in_between(br: BlockRange, br0: BlockRange, br1: BlockRange) -> bool:
     return br0.end <= br.start and br.end <= br1.start
 
