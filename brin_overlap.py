@@ -50,6 +50,9 @@ def try_insert(level: list[BlockRange], br: BlockRange) -> bool:
 
 
 def compute_overlap(block_ranges: list[BlockRange]) -> BrinOverlap:
+    # note: i expected this to be sorted already, but it's not! this makes the
+    # viz look much nicer.
+    block_ranges = sorted(block_ranges, key=lambda br: br.blknum)
     bro = BrinOverlap(datetime.max, datetime.min, 0, [])
     # maybe sort by block range size?
     for i, br in enumerate(block_ranges):

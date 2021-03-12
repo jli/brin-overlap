@@ -12,7 +12,7 @@ from brin_parser import BlockRange
 DEFAULT_WIDTH = 5000
 DEFAULT_NUM_TICKS = 50
 DEFAULT_BLOCK_HEIGHT = 8
-DEFAULT_COLORMAP = "cool"
+DEFAULT_COLORMAP = "RdYlGn"
 HGAP = 2  # gap between blocks on the same level
 VGAP = 2  # gap between levels
 CANVAS_MARGIN = 20
@@ -66,7 +66,6 @@ def svg(
     cmap = cm.get_cmap(colormap) if colormap else None
     for num_level, level in enumerate(bro.levels):
         for br in level:
-            # color = colors.rgb2hex(cmap(i / bro.total)) if cmap else 'lightgrey'
             color = (
                 colors.to_hex(cmap(br.blknum / 128 / bro.total))
                 if cmap
