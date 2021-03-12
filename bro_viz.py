@@ -1,10 +1,12 @@
 #!/usr/bin/env python3
 
+"""Render SVG of BRIN overlaps"""
+
 import argparse
 import logging
 
 from brin_overlap import compute_overlap
-from brin_parser import parse_csv
+from brin_parser import parse_csv_rows
 from brin_viz import DEFAULT_CANVAS_WIDTH, DEFAULT_COLORMAP, svg
 
 
@@ -12,7 +14,7 @@ def main(args):
     logging.basicConfig(level=logging.INFO)
     with open(args.input) as f:
         logging.info('reading input...')
-        block_ranges = parse_csv(f)
+        block_ranges = parse_csv_rows(f)
     logging.info('computing overlap...')
     brin_overlap = compute_overlap(block_ranges)
     logging.info('rendering SVG...')

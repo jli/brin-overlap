@@ -39,7 +39,7 @@ def parse_datetime_tuple(s: str) -> tuple[datetime, datetime]:
         raise RuntimeError(f"failed to parse datetime tuple: {s}")
 
 
-def parse_csv(csv_rows: Iterable[str]) -> list[BlockRange]:
+def parse_csv_rows(csv_rows: Iterable[str]) -> list[BlockRange]:
     reader = csv.reader(csv_rows)
     brs = []
     for i, row in enumerate(reader):
@@ -51,9 +51,13 @@ def parse_csv(csv_rows: Iterable[str]) -> list[BlockRange]:
     return brs
 
 
+def parse_csv_file(filepath: str) -> list[BlockRange]:
+    with open(filepath) as f:
+        return parse_csv_rows(f)
+
 #%%
 if __name__ == "__main__":
     with open("brin_export_full.csv") as f:
-        blocks = parse_csv(f)
+        blocks = parse_csv_rows(f)
     for i, block in enumerate(blocks[:10]):
         print(f"{i:2d}   {block}")
