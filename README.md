@@ -18,8 +18,11 @@ the page numbers until the query returns an error (which should be due to
 requesting a non-existent page). Set env vars to configure.
 
 Note: it's expected that the script will output an error like: `ERROR: block
-number 418 is out of range for relation "<table>_idx"`. The script simply
+number 418 is out of range for relation "TABLE_idx"`. The script simply
 keeps querying for
+
+Other notes:
+- Pass `ATTNUM=-1` to include all BRIN attributes in the output. (This format isn't compatible with brin_parser.py, though.) (TODO: maybe just include attnum by default.)
 
 ### Parse and render output
 

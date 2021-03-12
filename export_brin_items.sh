@@ -2,17 +2,17 @@
 
 set -eu -o pipefail
 
-# Set env vars PGHOST, PGDB, PGUSER, PGPASSWORD, PGIDX.
-# TODO: better way of checking that vars are set...
 PGHOST=${PGHOST:-localhost}
 PGUSER=${PGUSER:-postgres}
 ATTNUM=${ATTNUM:-1}
+[ -z ${PGDB+x} ] && echo "missing required env var PGDB" && exit 1
+[ -z ${PGPASSWORD+x} ] && echo "missing required env var PGPASSWORD" && exit 1
+[ -z ${PGIDX+x} ] && echo "missing required env var PGIDX" && exit 1
 FIRSTPAGE=${FIRSTPAGE:-0}  # first page to start searching for regular pages
 OUTFILE=${OUTFILE:-brinitems_$(date "+%Y%m%d_%H%M%S").csv}
-echo "connecting to host $PGHOST db $PGDB as $PGUSER, exporting attname $ATTNUM from $PGIDX..."
 
-tmp=$(mktemp -d tmp-export_brin_items.XX)
-trap 'rm -rf $tmp' EXIT
+echo "=> connecting to host $PGHOST db $PGDB as $PGUSER."
+echo "=> exporting attname $ATTNUM from $PGIDX to $OUTFILE."
 
 function load_extension {
     psql -h "$PGHOST" -d "$PGDB" -U "$PGUSER" -X -c "CREATE EXTENSION pageinspect"
@@ -21,6 +21,10 @@ function load_extension {
 function unload_extension {
     psql -h "$PGHOST" -d "$PGDB" -U "$PGUSER" -X -c "DROP EXTENSION pageinspect"
 }
+
+tmp=$(mktemp -d tmp-export_brin_items.XX)
+trap 'rm -rf $tmp' EXIT
+trap 'unload_extension' EXIT
 
 # Return type of page number.
 function get_page_type {
@@ -33,9 +37,19 @@ function get_page_type {
 function export_page {
     PAGE="$1"
     PAGE_OUTFILE="$tmp/brin_export_$PAGE.csv"
+    # if attnum is set to -1, we export all columns
+    if [ "$ATTNUM" == -1 ]; then
+        COLS="blknum, attnum, value"
+        WHERE=""
+        ORDER_COLS="blknum, attnum"
+    else
+        COLS="blknum, value"
+        WHERE="WHERE attnum=$ATTNUM"
+        ORDER_COLS="blknum"
+    fi
     # -t to suppress headers, -X to not load .psql (suppress \timing output)
     if psql -h "$PGHOST" -d "$PGDB" -U "$PGUSER" --csv -t -X \
-        -c "SELECT blknum, value FROM brin_page_items(get_raw_page('$PGIDX', $PAGE), '$PGIDX') WHERE attnum=$ATTNUM ORDER BY blknum" \
+        -c "SELECT $COLS FROM brin_page_items(get_raw_page('$PGIDX', $PAGE), '$PGIDX') $WHERE ORDER BY $ORDER_COLS" \
         > "$PAGE_OUTFILE"; then
         echo "good"
     else
