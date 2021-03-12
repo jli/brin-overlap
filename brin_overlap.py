@@ -1,15 +1,18 @@
 #%%
 from __future__ import annotations
-from datetime import datetime
+
 from dataclasses import dataclass
+from datetime import datetime
 
 from brin_parser import BlockRange
+
 
 # TODO: more than datetime..
 @dataclass
 class BrinOverlap:
     min_val: datetime
     max_val: datetime
+    total: int
     levels: list[list[BlockRange]]
 
 
@@ -35,11 +38,12 @@ def try_insert(level: list[BlockRange], br: BlockRange) -> bool:
 
 
 def compute_overlap(block_ranges: list[BlockRange]) -> BrinOverlap:
-    bro = BrinOverlap(datetime.max, datetime.min, [])
+    bro = BrinOverlap(datetime.max, datetime.min, 0, [])
     # maybe sort by block range size?
     for br in block_ranges:
         bro.min_val = min(bro.min_val, br.start)
         bro.max_val = max(bro.max_val, br.end)
+        bro.total += 1
         for level in bro.levels:
             if try_insert(level, br):
                 break
@@ -48,7 +52,7 @@ def compute_overlap(block_ranges: list[BlockRange]) -> BrinOverlap:
     return bro
 
 
-def render_bro(bro: BrinOverlap):
+def print_bro(bro: BrinOverlap):
     print("BrinOverlap min:", bro.min_val)
     print("            max:", bro.max_val)
     print("     num levels:", len(bro.levels))
