@@ -1,6 +1,7 @@
 #%%
 from __future__ import annotations
 
+import logging
 from dataclasses import dataclass
 from datetime import datetime
 
@@ -40,7 +41,9 @@ def try_insert(level: list[BlockRange], br: BlockRange) -> bool:
 def compute_overlap(block_ranges: list[BlockRange]) -> BrinOverlap:
     bro = BrinOverlap(datetime.max, datetime.min, 0, [])
     # maybe sort by block range size?
-    for br in block_ranges:
+    for i, br in enumerate(block_ranges):
+        if i % 5000 == 0:
+            logging.info(f'adding row {i} {i/len(block_ranges)*100:.1f}%')
         bro.min_val = min(bro.min_val, br.start)
         bro.max_val = max(bro.max_val, br.end)
         bro.total += 1
