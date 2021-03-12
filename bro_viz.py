@@ -30,7 +30,7 @@ def main(args):
     svg(
         brin_overlap,
         outfile=args.output,
-        canvas_width=args.width,
+        width=args.width,
         colormap=args.colormap,
     )
     logging.info("done✨")
