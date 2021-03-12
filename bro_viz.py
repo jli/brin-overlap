@@ -5,32 +5,44 @@
 import argparse
 import logging
 
-from brin_overlap import compute_overlap
+from brin_overlap import BrinOverlap, compute_overlap
 from brin_parser import parse_csv_rows
 from brin_viz import DEFAULT_CANVAS_WIDTH, DEFAULT_COLORMAP, svg
 
 
 def main(args):
     logging.basicConfig(level=logging.INFO)
-    with open(args.input) as f:
-        logging.info('reading input...')
-        block_ranges = parse_csv_rows(f)
-    logging.info('computing overlap...')
-    brin_overlap = compute_overlap(block_ranges)
-    logging.info('rendering SVG...')
+
+    if args.input.lower().endswith("csv"):
+        logging.info("reading input CSV...")
+        with open(args.input) as f:
+            block_ranges = parse_csv_rows(f)
+        logging.info("computing overlap...")
+        brin_overlap = compute_overlap(block_ranges)
+    elif args.input.lower().endswith("json"):
+        logging.info("reading input JSON...")
+        with open(args.input) as f:
+            brin_overlap = BrinOverlap.from_json(f.read())  # type: ignore
+    else:
+        raise ValueError(f"-i input file <{args.input}> must be csv or json")
+
+    logging.info("rendering SVG...")
     svg(
         brin_overlap,
         outfile=args.output,
         canvas_width=args.width,
         colormap=args.colormap,
     )
-    logging.info('done✨')
+    logging.info("done✨")
 
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument(
-        "-i", dest="input", required=True, help="input CSV file with brin page items"
+        "-i",
+        dest="input",
+        required=True,
+        help="input CSV of brin page items OR input JSON of BrinOverlap data",
     )
     parser.add_argument("-o", dest="output", required=True, help="output SVG file")
     parser.add_argument(

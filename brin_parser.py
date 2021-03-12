@@ -3,12 +3,14 @@ from __future__ import annotations
 
 import csv
 import re
+from dataclasses_json import dataclass_json
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Iterable
 
 
 # TODO: handle non-datetime values
+@dataclass_json
 @dataclass
 class BlockRange:
     blknum: int

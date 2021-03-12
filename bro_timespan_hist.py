@@ -27,9 +27,9 @@ def main(filepath: str, outfile: Optional[str]):
 
 
 #%%
-if __name__ == '__main__':
+if __name__ == "__main__":
     p = argparse.ArgumentParser()
-    p.add_argument('-i', dest="input", required=True, help="input path to CSV")
-    p.add_argument('-o', dest="output", required=True, help="output path for histogram")
+    p.add_argument("-i", dest="input", required=True, help="input path to CSV")
+    p.add_argument("-o", dest="output", required=True, help="output path for histogram")
     args = p.parse_args()
     main(args.input, args.output)

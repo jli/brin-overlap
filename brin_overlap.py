@@ -1,16 +1,22 @@
+#!/usr/bin/env python3
 #%%
 from __future__ import annotations
 
+import argparse
 import logging
 from dataclasses import dataclass
 from datetime import datetime
 
-from brin_parser import BlockRange
+from dataclasses_json import dataclass_json
+
+from brin_parser import BlockRange, parse_csv_file
 
 
-# TODO: more than datetime..
+# NOTE: there's some kooky timezone stuff happening when round-tripping JSON...
+@dataclass_json
 @dataclass
 class BrinOverlap:
+    # TODO: more than datetime..
     min_val: datetime
     max_val: datetime
     total: int
@@ -43,7 +49,7 @@ def compute_overlap(block_ranges: list[BlockRange]) -> BrinOverlap:
     # maybe sort by block range size?
     for i, br in enumerate(block_ranges):
         if i % 5000 == 0:
-            logging.info(f'adding row {i} {i/len(block_ranges)*100:.1f}%')
+            logging.info(f"adding row {i} {i/len(block_ranges)*100:.1f}%")
         bro.min_val = min(bro.min_val, br.start)
         bro.max_val = max(bro.max_val, br.end)
         bro.total += 1
@@ -61,3 +67,24 @@ def print_bro(bro: BrinOverlap):
     print("     num levels:", len(bro.levels))
     for i, level in enumerate(bro.levels, 1):
         print(f"{i}:", [br.blknum for br in level])
+
+
+#%%
+if __name__ == "__main__":
+    import logging
+
+    logging.basicConfig(level=logging.INFO)
+    p = argparse.ArgumentParser()
+    p.add_argument("-i", dest="input", required=True, help="input CSV")
+    p.add_argument(
+        "-o", dest="output", required=True, help="output JSON (cached BrinOverlap data)"
+    )
+    args = p.parse_args()
+    brs = parse_csv_file(args.input)
+    logging.info("computing overlap...")
+    overlap = compute_overlap(brs)
+    logging.info(f"saving to {args.output}...")
+    with open(args.output, "w") as f:
+        f.write(overlap.to_json(indent=1))  # type: ignore
+        f.write("\n")
+    logging.info("done✨")
