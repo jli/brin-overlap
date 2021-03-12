@@ -9,7 +9,8 @@ from matplotlib import cm
 from brin_overlap import BrinOverlap
 from brin_parser import BlockRange
 
-DEFAULT_CANVAS_WIDTH = 700
+DEFAULT_WIDTH = 5000
+DEFAULT_NUM_TICKS = 50
 DEFAULT_BLOCK_HEIGHT = 8
 DEFAULT_COLORMAP = "cool"
 HGAP = 2  # gap between blocks on the same level
@@ -21,8 +22,9 @@ DATE_FONT_SIZE = 8
 def svg(
     bro: BrinOverlap,
     outfile: Optional[str] = None,
-    width: float = DEFAULT_CANVAS_WIDTH,
+    width: float = DEFAULT_WIDTH,
     block_height: float = DEFAULT_BLOCK_HEIGHT,
+    num_ticks: int = DEFAULT_NUM_TICKS,
     colormap: Optional[str] = DEFAULT_COLORMAP,
 ):
     full_width = width
@@ -74,7 +76,7 @@ def svg(
             d.append(r)
 
     # draw time ticks
-    for dt in datetime_range(bro.min_val, bro.max_val, 10):
+    for dt in datetime_range(bro.min_val, bro.max_val, num_ticks):
         text = [dt.strftime("%Y-%m-%d"), dt.strftime("%H:%M")]
         x = interpx(dt) + CANVAS_MARGIN
         # x - 18 to center under tick (hack)

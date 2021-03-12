@@ -7,7 +7,7 @@ import logging
 
 from brin_overlap import compute_overlap, read_overlap_file
 from brin_parser import parse_csv_file
-from brin_viz import DEFAULT_CANVAS_WIDTH, DEFAULT_COLORMAP, svg
+from brin_viz import DEFAULT_WIDTH, DEFAULT_COLORMAP, DEFAULT_NUM_TICKS, svg
 
 
 def main(args):
@@ -29,6 +29,7 @@ def main(args):
         brin_overlap,
         outfile=args.output,
         width=args.width,
+        num_ticks=args.num_ticks,
         colormap=args.colormap,
     )
     logging.info("done✨")
@@ -47,8 +48,15 @@ if __name__ == "__main__":
         "-w",
         dest="width",
         type=float,
-        default=DEFAULT_CANVAS_WIDTH,
+        default=DEFAULT_WIDTH,
         help="width of SVG",
+    )
+    parser.add_argument(
+        "-t",
+        dest="num_ticks",
+        type=int,
+        default=DEFAULT_NUM_TICKS,
+        help="number of x-axis time ticks",
     )
     group = parser.add_mutually_exclusive_group()
     group.add_argument(
