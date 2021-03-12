@@ -25,8 +25,11 @@ function unload_extension {
 }
 
 tmp=$(mktemp -d tmp-export_brin_items.XX)
-trap 'rm -rf $tmp' EXIT
-trap 'unload_extension' EXIT
+function cleanup {
+    rm -rf "$tmp" || true
+    unload_extension || true
+}
+trap 'cleanup' EXIT
 
 # Return type of page number.
 function get_page_type {
@@ -87,6 +90,13 @@ while true; do
 done
 
 echo "-> concatenating csvs..."
+# TODO: way to dedup this?
+COLS=""
+if [ "$ATTNUM" == -1 ]; then
+    COLS="blknum,attnum,value"
+else
+    COLS="blknum,value"
+fi
 (echo "$COLS"; cat "$tmp"/*.csv) > "$OUTFILE"
 
 echo "=> result in $OUTFILE ✨"
