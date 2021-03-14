@@ -50,6 +50,9 @@ def parse_csv_rows(csv_rows: Iterable[str]) -> list[BlockRange]:
             continue
         blknum, value = row
         brs.append(BlockRange(int(blknum), *parse_datetime_tuple(value)))
+    # note: i expected this to be sorted already, but it's not! this makes the
+    # viz look much nicer.
+    brs = sorted(brs, key=lambda br: br.blknum)
     return brs
 
 
@@ -59,7 +62,6 @@ def parse_csv_file(filepath: str) -> list[BlockRange]:
 
 #%%
 if __name__ == "__main__":
-    with open("brin_export_full.csv") as f:
-        blocks = parse_csv_rows(f)
+    blocks = parse_csv_file("brin_export_full.csv")
     for i, block in enumerate(blocks[:10]):
         print(f"{i:2d}   {block}")
