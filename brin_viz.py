@@ -19,8 +19,19 @@ CANVAS_MARGIN = 20
 DATE_FONT_SIZE = 8
 
 
-def br_frac(blknum: int, min_blknum: int, max_blknum: int) -> float:
+def _br_frac(blknum: int, min_blknum: int, max_blknum: int) -> float:
     return (blknum - min_blknum) / (max_blknum - min_blknum)
+
+
+def _datetime_range(start: datetime, end: datetime, num_points: int) -> list[datetime]:
+    total_span = end - start
+    interval_span = total_span / (num_points - 1)
+    ptr = start
+    res = []
+    for _ in range(1, num_points + 1):
+        res.append(ptr)
+        ptr += interval_span
+    return res
 
 
 def svg(
@@ -70,13 +81,13 @@ def svg(
     cmap = cm.get_cmap(colormap) if colormap else None
     for num_level, level in enumerate(bro.levels):
         for br in level:
-            p = br_frac(br.blknum, bro.min_blknum, bro.max_blknum)
+            p = _br_frac(br.blknum, bro.min_blknum, bro.max_blknum)
             color = colors.to_hex(cmap(p)) if cmap else "lightgrey"
             r = draw.Rectangle(*xywh(br, num_level), fill=color, stroke="black")
             d.append(r)
 
     # draw time ticks
-    for dt in datetime_range(bro.min_val, bro.max_val, num_ticks):
+    for dt in _datetime_range(bro.min_val, bro.max_val, num_ticks):
         text = [dt.strftime("%Y-%m-%d"), dt.strftime("%H:%M")]
         x = interpx(dt) + CANVAS_MARGIN
         # x - 18 to center under tick (hack)
@@ -89,14 +100,3 @@ def svg(
         print(f"saving to {outfile}")
         d.saveSvg(outfile)
     return d
-
-
-def datetime_range(start: datetime, end: datetime, num_points: int) -> list[datetime]:
-    total_span = end - start
-    interval_span = total_span / (num_points - 1)
-    ptr = start
-    res = []
-    for _ in range(1, num_points + 1):
-        res.append(ptr)
-        ptr += interval_span
-    return res
