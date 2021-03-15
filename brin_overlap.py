@@ -1,14 +1,15 @@
 #!/usr/bin/env python3
 #%%
-from __future__ import annotations
-from typing import Optional
 
 """Compute BrinOverlap object from list of BlockRanges."""
+
+from __future__ import annotations
 
 import argparse
 import logging
 from dataclasses import dataclass
 from datetime import datetime
+from typing import Optional
 
 from dataclasses_json import dataclass_json
 
@@ -31,31 +32,41 @@ class BrinOverlap:
         return BrinOverlap(br.start, br.end, br.blknum, br.blknum, [[br]])
 
 
-
 def read_overlap_file(filepath: str) -> BrinOverlap:
     with open(filepath) as f:
         return BrinOverlap.from_json(f.read())  # type: ignore
 
 
-def fits_in_between(br: BlockRange, br0: BlockRange, br1: BlockRange) -> bool:
-    return br0.end <= br.start and br.end <= br1.start
+def find_position(xs: list[BlockRange], x: BlockRange) -> Optional[int]:
+    """Returns index i in xs where x can be inserted (in between existing
+    elements xs[i-1] and xs[i]."""
+    # We binsearch for a valid spot based on just the start time, and
+    # then check that the position is fully valid (considering end time).
+    # search range is [lo, hi). code based on Python bisect.bisect_right.
+    lo, hi = 0, len(xs)
+    while lo < hi:
+        mid = (hi + lo) // 2
+        x_mid = xs[mid]
+        if x.start < x_mid.start:
+            hi = mid
+        else:
+            lo = mid + 1
+    # lo is the candidate position.
+    left_neighbor = xs[lo - 1] if lo - 1 >= 0 else None
+    right_neighbor = xs[lo] if lo < len(xs) else None
+    if (left_neighbor is None or left_neighbor.end <= x.start) and (
+        right_neighbor is None or x.end <= right_neighbor.start
+    ):
+        return lo
+    return None
 
 
 def try_insert(level: list[BlockRange], br: BlockRange) -> bool:
-    if not level:
-        level.append(br)
-        return True
-    if br.end <= level[0].start:
-        level.insert(0, br)
-        return True
-    if level[-1].end <= br.start:
-        level.append(br)
-        return True
-    for i, (br0, br1) in enumerate(zip(level, level[1:])):
-        if fits_in_between(br, br0, br1):
-            level.insert(i + 1, br)
-            return True
-    return False
+    pos = find_position(level, br)
+    if pos is None:
+        return False
+    level.insert(pos, br)
+    return True
 
 
 def compute_overlap(block_ranges: list[BlockRange]) -> BrinOverlap:

@@ -60,6 +60,23 @@ def test_try_insert_fail():
     assert not try_insert(levels, ab3)
 
 
+def test_try_insert_edge():
+    a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
+    b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
+    # empty list
+    level = []
+    assert try_insert(level, a)
+    assert blknums(level) == [1]
+    # insert before first element
+    level = [b]
+    assert try_insert(level, a)
+    assert blknums(level) == [1, 2]
+    # insert after last element
+    level = [a]
+    assert try_insert(level, b)
+    assert blknums(level) == [1, 2]
+
+
 def test_compute_overlap_ordered():
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
@@ -72,6 +89,7 @@ def test_compute_overlap_ordered():
     assert bro.max_blknum == 4
     assert len(bro.levels) == 1
     assert blknums(bro.levels[0]) == [1, 2, 3, 4]
+
 
 def test_compute_overlap_overlap():
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
