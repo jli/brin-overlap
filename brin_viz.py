@@ -19,6 +19,10 @@ CANVAS_MARGIN = 20
 DATE_FONT_SIZE = 8
 
 
+def br_frac(blknum: int, min_blknum: int, max_blknum: int) -> float:
+    return (blknum - min_blknum) / (max_blknum - min_blknum)
+
+
 def svg(
     bro: BrinOverlap,
     outfile: Optional[str] = None,
@@ -66,11 +70,8 @@ def svg(
     cmap = cm.get_cmap(colormap) if colormap else None
     for num_level, level in enumerate(bro.levels):
         for br in level:
-            color = (
-                colors.to_hex(cmap(br.blknum / 128 / bro.total))
-                if cmap
-                else "lightgrey"
-            )
+            p = br_frac(br.blknum, bro.min_blknum, bro.max_blknum)
+            color = colors.to_hex(cmap(p)) if cmap else "lightgrey"
             r = draw.Rectangle(*xywh(br, num_level), fill=color, stroke="black")
             d.append(r)
 
@@ -82,7 +83,7 @@ def svg(
         # y = font size because multi-line string.
         d.append(draw.Text(text, DATE_FONT_SIZE, x - 18, DATE_FONT_SIZE))
         # -7 is magic number (hack)
-        d.append(draw.Line(x, CANVAS_MARGIN, x, CANVAS_MARGIN - 7, stroke='black'))
+        d.append(draw.Line(x, CANVAS_MARGIN, x, CANVAS_MARGIN - 7, stroke="black"))
 
     if outfile:
         print(f"saving to {outfile}")

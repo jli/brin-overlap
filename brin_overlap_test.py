@@ -68,6 +68,8 @@ def test_compute_overlap_ordered():
     bro = compute_overlap([a, b, c, d])
     assert bro.min_val.timestamp() == 1
     assert bro.max_val.timestamp() == 8
+    assert bro.min_blknum == 1
+    assert bro.max_blknum == 4
     assert len(bro.levels) == 1
     assert blknums(bro.levels[0]) == [1, 2, 3, 4]
 
@@ -79,6 +81,8 @@ def test_compute_overlap_overlap():
     bro = compute_overlap([a, b, c, d])
     assert bro.min_val.timestamp() == 1
     assert bro.max_val.timestamp() == 4
+    assert bro.min_blknum == 1
+    assert bro.max_blknum == 4
     assert len(bro.levels) == 2
     assert blknums(bro.levels[0]) == [1, 2]
     assert blknums(bro.levels[1]) == [4, 3]
