@@ -14,6 +14,7 @@ from typing import Optional
 from dataclasses_json import dataclass_json
 
 from brin_parser import BlockRange, parse_csv_file
+import brin_filenames
 
 
 # NOTE: there's some kooky timezone stuff happening when round-tripping JSON...
@@ -35,6 +36,12 @@ class BrinOverlap:
 def read_overlap_file(filepath: str) -> BrinOverlap:
     with open(filepath) as f:
         return BrinOverlap.from_json(f.read())  # type: ignore
+
+
+def write_overlap_file(bro: BrinOverlap, path: str):
+    with open(path, "w") as f:
+        f.write(bro.to_json(indent=1))  # type: ignore
+        f.write("\n")
 
 
 def find_position(xs: list[BlockRange], x: BlockRange) -> Optional[int]:
@@ -74,7 +81,7 @@ def compute_overlap(block_ranges: list[BlockRange]) -> BrinOverlap:
     # maybe sort by block range size?
     for i, br in enumerate(block_ranges):
         if i % 5000 == 0:
-            logging.info(f"adding row {i} {i/len(block_ranges)*100:.1f}%")
+            logging.info(f"adding block range {i} {i/len(block_ranges)*100:.1f}%")
         if bro is None:
             bro = BrinOverlap.initialize(br)
             continue
@@ -107,15 +114,12 @@ if __name__ == "__main__":
     logging.basicConfig(level=logging.INFO)
     p = argparse.ArgumentParser()
     p.add_argument("-i", dest="input", required=True, help="input CSV")
-    p.add_argument(
-        "-o", dest="output", required=True, help="output JSON (cached BrinOverlap data)"
-    )
+    p.add_argument("-o", dest="output", help="output JSON (cached BrinOverlap data)")
     args = p.parse_args()
+    output = args.output or brin_filenames.overlap_json_from_brinexport_csv(args.input)
     brs = parse_csv_file(args.input)
     logging.info("computing overlap...")
     overlap = compute_overlap(brs)
-    logging.info(f"saving to {args.output}...")
-    with open(args.output, "w") as f:
-        f.write(overlap.to_json(indent=1))  # type: ignore
-        f.write("\n")
+    logging.info(f"saving to {output}...")
+    write_overlap_file(overlap, output)
     logging.info("done✨")
