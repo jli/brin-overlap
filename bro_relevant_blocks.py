@@ -6,16 +6,20 @@
 import argparse
 import math
 from datetime import datetime
+from typing import Optional
 
 from brin_parser import BlockRange, parse_csv_file
 
 
-def block_range_contains(br: BlockRange, dt: datetime) -> bool:
-    return br.start <= dt and dt <= br.end
+def block_range_contains(br: BlockRange, dt: datetime, dt_end: Optional[datetime]) -> bool:
+    if dt_end is None:
+        return br.start <= dt and dt <= br.end
+    dt_start = dt
+    return br.start <= dt_end and dt_start <= br.end
 
 
-def filter_dt(block_ranges: list[BlockRange], dt: datetime) -> list[BlockRange]:
-    return [br for br in block_ranges if block_range_contains(br, dt)]
+def filter_dt(block_ranges: list[BlockRange], dt: datetime, dt_end: Optional[datetime]) -> list[BlockRange]:
+    return [br for br in block_ranges if block_range_contains(br, dt, dt_end)]
 
 
 def br_with_span(br: BlockRange) -> str:
@@ -26,8 +30,8 @@ def br_with_span(br: BlockRange) -> str:
     return f"BR({br.blknum}, {t(br.start)}..{t(br.end)})  {span}"
 
 
-def stats(brs: list[BlockRange], dt: datetime, num_rows: int):
-    rel_brs = filter_dt(brs, dt)
+def stats(brs: list[BlockRange], dt: datetime, dt_end: Optional[datetime], num_rows: int):
+    rel_brs = filter_dt(brs, dt, dt_end)
     print(
         f"num relevant block ranges: {len(rel_brs)}. {len(rel_brs)/len(brs)*100:.1f}% (of {len(brs)})"
     )
@@ -56,6 +60,12 @@ if __name__ == "__main__":
         help="datetime value to search for",
     )
     parser.add_argument(
+        "-d2",
+        dest="datetime_end",
+        type=datetime.fromisoformat,
+        help="if given, do a range/between search from -d to -d2",
+    )
+    parser.add_argument(
         "-n",
         dest="num_rows",
         default=30,
@@ -64,4 +74,4 @@ if __name__ == "__main__":
     )
     args = parser.parse_args()
     brs = parse_csv_file(args.input)
-    stats(brs, args.datetime, args.num_rows)
+    stats(brs, args.datetime, args.datetime_end, args.num_rows)
