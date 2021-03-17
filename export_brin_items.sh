@@ -41,7 +41,8 @@ function get_page_type {
 # Export page number to CSV. Returns "good" or "bad" depending on error.
 function export_page {
     PAGE="$1"
-    PAGE_OUTFILE="$tmp/brin_export_$PAGE.csv"
+    # add date to get better ordering. still not perfect, but %N nanoseconds only works w/ GNU coreutils, sigh.
+    PAGE_OUTFILE="$tmp/brin_export_$(date +%s)_$PAGE.csv"
     # if attnum is set to -1, we export all columns
     if [ "$ATTNUM" == -1 ]; then
         COLS="blknum,attnum,value"
