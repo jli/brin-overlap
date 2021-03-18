@@ -39,20 +39,25 @@ def _even_datetime_range(
 
 
 # Note: the auto functions were just tweaked by hand until they looked nice.
-# Should perhaps take a more principled appoach.
+# This is a kinda spaghetti, should consider a more principled approach.
 def _auto_datetime_range(
     start: datetime, end: datetime, num_points: int
 ) -> list[datetime]:
     total_span = end - start
     interval = total_span / num_points
-    rounded_start = _round_start_time(start, interval)
     rounded_interval = _round_interval(interval)
-    logging.debug(f"auto ticks: {total_span=!s} {interval=!s} {rounded_interval=!s}")
-    logging.debug(f"auto ticks: {start=!s} {rounded_start=!s}")
-    # rounded_interval = interval
+    rounded_start = _round_start_time(start, rounded_interval)
+    logging.debug(f"autoticks: {total_span=!s}")
+    logging.debug(f"autoticks: {interval=!s} => {rounded_interval=!s}")
+    logging.debug(f"autoticks: {start=!s} => {rounded_start=!s}")
+
     # Ensure that dts uses the given start/end time as the first and last value.
     dts = [start]
     ptr = rounded_start + rounded_interval
+    # Given multiple levels of rounding, the first tick after start may
+    # be too close to the start. Skip it if so.
+    if ptr - start < interval / 2:
+        ptr += rounded_interval
     while ptr < end:
         dts.append(ptr)
         ptr += rounded_interval
@@ -66,10 +71,10 @@ def _round_start_time(start: datetime, interval: timedelta) -> datetime:
     """Returns datetime close to start but more "rounded"."""
     if interval > timedelta(days=1):
         return datetime(start.year, start.month, start.day, tzinfo=start.tzinfo)
-    if interval > timedelta(hours=6):
-        nearest_6th_hour = round(start.hour / 6) * 6
+    if interval >= timedelta(hours=3):
+        nearest_3rd_hour = round(start.hour / 6) * 6
         return datetime(
-            start.year, start.month, start.day, nearest_6th_hour, tzinfo=start.tzinfo
+            start.year, start.month, start.day, nearest_3rd_hour, tzinfo=start.tzinfo
         )
     if interval > timedelta(hours=1):
         return datetime(
@@ -85,11 +90,15 @@ def _round_start_time(start: datetime, interval: timedelta) -> datetime:
 def _round_interval(interval: timedelta) -> timedelta:
     if interval > timedelta(days=1):
         return timedelta(days=interval.days)
-    if interval > timedelta(hours=3):
+    if interval > timedelta(hours=4):
         hours = interval.total_seconds() / 3600
         multiple_of_6h = round(hours / 6) * 6
         return timedelta(hours=multiple_of_6h)
-    if interval > timedelta(minutes=30):
+    if interval > timedelta(hours=1.5):
+        hours = interval.total_seconds() / 3600
+        multiple_of_3h = round(hours / 3) * 3
+        return timedelta(hours=multiple_of_3h)
+    if interval > timedelta(minutes=15):
         minutes = interval.total_seconds() / 60
         nearest_30_min = round(minutes / 30) * 30
         return timedelta(minutes=nearest_30_min)
