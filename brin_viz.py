@@ -69,14 +69,14 @@ def _auto_datetime_range(
 
 def _round_start_time(start: datetime, interval: timedelta) -> datetime:
     """Returns datetime close to start but more "rounded"."""
-    if interval > timedelta(days=1):
+    if interval >= timedelta(days=1):
         return datetime(start.year, start.month, start.day, tzinfo=start.tzinfo)
     if interval >= timedelta(hours=3):
         nearest_3rd_hour = round(start.hour / 6) * 6
         return datetime(
             start.year, start.month, start.day, nearest_3rd_hour, tzinfo=start.tzinfo
         )
-    if interval > timedelta(hours=1):
+    if interval >= timedelta(hours=1):
         return datetime(
             start.year,
             start.month,
