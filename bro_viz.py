@@ -22,7 +22,7 @@ def main(args):
     outfile = args.output
     if args.input.lower().endswith("csv"):
         if outfile is None:
-            outfile = brin_filenames.viz_svg_from_brinexport_csv(args.input)
+            outfile = brin_filenames.viz_svg_from_brinexport_csv(args.input, args.after)
         logging.info("reading input CSV...")
         block_ranges = brin_parser.parse_csv_file(args.input, start=args.after)
         logging.info("computing overlap...")
