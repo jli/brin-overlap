@@ -2,35 +2,37 @@ from __future__ import annotations
 from datetime import datetime
 
 from brin_parser import BlockRange
-from brin_overlap import compute_overlap, fits_in_between, try_insert
+from brin_overlap import compute_overlap, find_position, try_insert
 
 
 def blknums(brs: list[BlockRange]) -> list[int]:
     return [br.blknum for br in brs]
 
 
-def test_fits_in_between():
+def test_find_position():
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
     c = BlockRange(3, datetime.fromtimestamp(5), datetime.fromtimestamp(6))
-    assert not fits_in_between(a, b, c)
-    assert not fits_in_between(a, c, b)
-    assert fits_in_between(b, a, c)
-    assert not fits_in_between(b, c, a)
-    assert not fits_in_between(c, a, b)
-    assert not fits_in_between(c, b, a)
+    assert find_position([b, c], a) == 0
+    assert find_position([a, c], b) == 1
+    assert find_position([a, b], c) == 2
 
 
-def test_fits_in_between_equal_endpoints():
+def test_find_position_equal_endpoints():
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(2), datetime.fromtimestamp(3))
     c = BlockRange(3, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
-    assert not fits_in_between(a, b, c)
-    assert not fits_in_between(a, c, b)
-    assert fits_in_between(b, a, c)
-    assert not fits_in_between(b, c, a)
-    assert not fits_in_between(c, a, b)
-    assert not fits_in_between(c, b, a)
+    assert find_position([b, c], a) == 0
+    assert find_position([a, c], b) == 1
+    assert find_position([a, b], c) == 2
+
+
+def test_find_position_overlap():
+    a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
+    b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
+    ab = BlockRange(3, datetime.fromtimestamp(2), datetime.fromtimestamp(4))
+    assert find_position([a, b], ab) is None
+    assert find_position([a, ab], b) is None
 
 
 def test_try_insert():
