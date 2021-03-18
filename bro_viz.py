@@ -3,6 +3,7 @@
 """Render SVG of BRIN overlaps"""
 
 import argparse
+from datetime import datetime
 import logging
 
 import brin_filenames
@@ -17,12 +18,15 @@ def main(args):
     if args.input.lower().endswith("csv"):
         overlap_path = brin_filenames.overlap_json_from_brinexport_csv(args.input)
         logging.info("reading input CSV...")
-        block_ranges = brin_parser.parse_csv_file(args.input)
+        block_ranges = brin_parser.parse_csv_file(args.input, start=args.after)
         logging.info("computing overlap...")
         overlap = brin_overlap.compute_overlap(block_ranges)
-        logging.info(f"(saving overlap to {overlap_path}...)")
-        brin_overlap.write_overlap_file(overlap, overlap_path)
+        if args.after is None:
+            logging.info(f"(saving overlap to {overlap_path}...)")
+            brin_overlap.write_overlap_file(overlap, overlap_path)
     elif args.input.lower().endswith("json"):
+        if args.after is not None:
+            raise ValueError("-after only valid for raw CSV input")
         overlap_path = args.input
         logging.info("reading input JSON...")
         overlap = brin_overlap.read_overlap_file(args.input)
@@ -48,6 +52,11 @@ if __name__ == "__main__":
         dest="input",
         required=True,
         help="input CSV of brin page items OR input JSON of BrinOverlap data",
+    )
+    parser.add_argument(
+        "-after",
+        type=datetime.fromisoformat,
+        help="Only show BRs after this point. Only applicable for CSV input.",
     )
     parser.add_argument("-o", dest="output", help="output SVG file")
     parser.add_argument(
