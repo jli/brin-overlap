@@ -1,5 +1,6 @@
 #%%
-from datetime import datetime
+from datetime import datetime, timedelta
+import logging
 from typing import Optional
 
 import drawSvg as draw
@@ -15,7 +16,8 @@ DEFAULT_BLOCK_HEIGHT = 8
 DEFAULT_COLORMAP = "RdYlGn"
 HGAP = 2  # gap between blocks on the same level
 VGAP = 2  # gap between levels
-CANVAS_MARGIN = 20
+APPROX_DATE_TICK_WIDTH = 40
+CANVAS_MARGIN = 20  # roughly date tick width / 2
 DATE_FONT_SIZE = 8
 
 
@@ -23,7 +25,9 @@ def _br_frac(blknum: int, min_blknum: int, max_blknum: int) -> float:
     return (blknum - min_blknum) / (max_blknum - min_blknum)
 
 
-def _datetime_range(start: datetime, end: datetime, num_points: int) -> list[datetime]:
+def _even_datetime_range(
+    start: datetime, end: datetime, num_points: int
+) -> list[datetime]:
     total_span = end - start
     interval_span = total_span / (num_points - 1)
     ptr = start
@@ -34,12 +38,75 @@ def _datetime_range(start: datetime, end: datetime, num_points: int) -> list[dat
     return res
 
 
+# Note: the auto functions were just tweaked by hand until they looked nice.
+# Should perhaps take a more principled appoach.
+def _auto_datetime_range(
+    start: datetime, end: datetime, num_points: int
+) -> list[datetime]:
+    total_span = end - start
+    interval = total_span / num_points
+    rounded_start = _round_start_time(start, interval)
+    rounded_interval = _round_interval(interval)
+    logging.debug(f"auto ticks: {total_span=!s} {interval=!s} {rounded_interval=!s}")
+    logging.debug(f"auto ticks: {start=!s} {rounded_start=!s}")
+    # rounded_interval = interval
+    # Ensure that dts uses the given start/end time as the first and last value.
+    dts = [start]
+    ptr = rounded_start + rounded_interval
+    while ptr < end:
+        dts.append(ptr)
+        ptr += rounded_interval
+    if end - dts[-1] < interval / 2:
+        dts = dts[:-1]
+    dts.append(end)
+    return dts
+
+
+def _round_start_time(start: datetime, interval: timedelta) -> datetime:
+    """Returns datetime close to start but more "rounded"."""
+    if interval > timedelta(days=1):
+        return datetime(start.year, start.month, start.day, tzinfo=start.tzinfo)
+    if interval > timedelta(hours=6):
+        nearest_6th_hour = round(start.hour / 6) * 6
+        return datetime(
+            start.year, start.month, start.day, nearest_6th_hour, tzinfo=start.tzinfo
+        )
+    if interval > timedelta(hours=1):
+        return datetime(
+            start.year,
+            start.month,
+            start.day,
+            start.hour,
+            tzinfo=start.tzinfo,
+        )
+    return start
+
+
+def _round_interval(interval: timedelta) -> timedelta:
+    if interval > timedelta(days=1):
+        return timedelta(days=interval.days)
+    if interval > timedelta(hours=3):
+        hours = interval.total_seconds() / 3600
+        multiple_of_6h = round(hours / 6) * 6
+        return timedelta(hours=multiple_of_6h)
+    if interval > timedelta(minutes=30):
+        minutes = interval.total_seconds() / 60
+        nearest_30_min = round(minutes / 30) * 30
+        return timedelta(minutes=nearest_30_min)
+    return interval
+
+
+def _auto_num_ticks(canvas_width: float) -> int:
+    num_ticks = int(round(canvas_width / APPROX_DATE_TICK_WIDTH / 1.5))
+    return max(num_ticks, 3)
+
+
 def svg(
     bro: BrinOverlap,
     outfile: Optional[str] = None,
     width: float = DEFAULT_WIDTH,
     block_height: float = DEFAULT_BLOCK_HEIGHT,
-    num_ticks: int = DEFAULT_NUM_TICKS,
+    num_ticks: Optional[int] = None,
     colormap: Optional[str] = DEFAULT_COLORMAP,
 ):
     full_width = width
@@ -50,6 +117,7 @@ def svg(
     # area for main drawing
     canvas_width = full_width - CANVAS_MARGIN * 2
     canvas_height = full_height - CANVAS_MARGIN * 2
+    # draw border around block range rectangles
     d.append(
         draw.Rectangle(
             CANVAS_MARGIN,
@@ -87,14 +155,25 @@ def svg(
             d.append(r)
 
     # draw time ticks
-    for dt in _datetime_range(bro.min_val, bro.max_val, num_ticks):
-        text = [dt.strftime("%Y-%m-%d"), dt.strftime("%H:%M")]
+    if num_ticks is None:
+        datetime_range = _auto_datetime_range(
+            bro.min_val, bro.max_val, _auto_num_ticks(canvas_width)
+        )
+    else:
+        datetime_range = _even_datetime_range(bro.min_val, bro.max_val, num_ticks)
+    prev_date = None
+    for dt in datetime_range:
+        # text = []
+        # if prev_date != dt.date():
+        #     text.append(dt.strftime("%Y-%m-%d"))
+        # text.append(dt.strftime("%H:%M"))
+        text = ["" if prev_date == dt.date() else dt.strftime("%Y-%m-%d"), dt.strftime("%H:%M")]
+        prev_date = dt.date()
         x = interpx(dt) + CANVAS_MARGIN
-        # x - 18 to center under tick (hack)
         # y = font size because multi-line string.
-        d.append(draw.Text(text, DATE_FONT_SIZE, x - 18, DATE_FONT_SIZE))
-        # -7 is magic number (hack)
-        d.append(draw.Line(x, CANVAS_MARGIN, x, CANVAS_MARGIN - 7, stroke="black"))
+        d.append(draw.Text(text, DATE_FONT_SIZE, x, DATE_FONT_SIZE, center=True))
+        # -6 is magic number (hack)
+        d.append(draw.Line(x, CANVAS_MARGIN, x, CANVAS_MARGIN - 6, stroke="black"))
 
     if outfile:
         print(f"saving to {outfile}")

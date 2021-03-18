@@ -9,11 +9,15 @@ import logging
 import brin_filenames
 import brin_overlap
 import brin_parser
-from brin_viz import DEFAULT_WIDTH, DEFAULT_COLORMAP, DEFAULT_NUM_TICKS, svg
+from brin_viz import DEFAULT_WIDTH, DEFAULT_COLORMAP, svg
+
+
+def _v_to_level(i: int) -> int:
+    return {0: logging.CRITICAL, 1: logging.INFO, 2: logging.DEBUG}[i]
 
 
 def main(args):
-    logging.basicConfig(level=logging.INFO)
+    logging.basicConfig(level=_v_to_level(args.v))
 
     outfile = args.output
     if args.input.lower().endswith("csv"):
@@ -73,7 +77,6 @@ if __name__ == "__main__":
         "-t",
         dest="num_ticks",
         type=int,
-        default=DEFAULT_NUM_TICKS,
         help="number of x-axis time ticks",
     )
     group = parser.add_mutually_exclusive_group()
@@ -89,6 +92,9 @@ if __name__ == "__main__":
         const=None,
         dest="colormap",
         help="disable coloring",
+    )
+    parser.add_argument(
+        "-v", type=int, default=1, choices=[0, 1, 2], help="logging verbosity"
     )
     args = parser.parse_args()
     main(args)
