@@ -15,25 +15,28 @@ from brin_viz import DEFAULT_WIDTH, DEFAULT_COLORMAP, DEFAULT_NUM_TICKS, svg
 def main(args):
     logging.basicConfig(level=logging.INFO)
 
+    outfile = args.output
     if args.input.lower().endswith("csv"):
-        overlap_path = brin_filenames.overlap_json_from_brinexport_csv(args.input)
+        if outfile is None:
+            outfile = brin_filenames.viz_svg_from_brinexport_csv(args.input)
         logging.info("reading input CSV...")
         block_ranges = brin_parser.parse_csv_file(args.input, start=args.after)
         logging.info("computing overlap...")
         overlap = brin_overlap.compute_overlap(block_ranges)
         if args.after is None:
+            overlap_path = brin_filenames.overlap_json_from_brinexport_csv(args.input)
             logging.info(f"(saving overlap to {overlap_path}...)")
             brin_overlap.write_overlap_file(overlap, overlap_path)
     elif args.input.lower().endswith("json"):
         if args.after is not None:
             raise ValueError("-after only valid for raw CSV input")
-        overlap_path = args.input
+        if outfile is None:
+            outfile = brin_filenames.viz_svg_from_overlap_json(args.input)
         logging.info("reading input JSON...")
         overlap = brin_overlap.read_overlap_file(args.input)
     else:
         raise ValueError(f"-i input file <{args.input}> must be csv or json")
 
-    outfile = args.output or brin_filenames.viz_svg_from_overlap_json(overlap_path)
     logging.info("rendering SVG...")
     svg(
         overlap,

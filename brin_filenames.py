@@ -50,3 +50,11 @@ def viz_svg_from_overlap_json(overlap_json: str) -> str:
     outpath = os.path.join(pathparts.dirname, outbase + ".svg")
     _check_exists(outpath)
     return outpath
+
+
+def viz_svg_from_brinexport_csv(brinexport_csv: str) -> str:
+    pathparts = _get_pathparts(brinexport_csv, ".csv")
+    outbase = pathparts.base.replace("brinexport_", "vizoverlap_")
+    outpath = os.path.join(pathparts.dirname, outbase + ".svg")
+    _check_exists(outpath)
+    return outpath
