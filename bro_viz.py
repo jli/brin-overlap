@@ -24,7 +24,9 @@ def main(args):
         if outfile is None:
             outfile = brin_filenames.viz_svg_from_brinexport_csv(args.input, args.after)
         logging.info("reading input CSV...")
-        block_ranges = brin_parser.parse_csv_file(args.input, start=args.after)
+        # By default, use "within" for smaller viz's when filtering with -after.
+        match_type = "overlap" if args.overlap else "within"
+        block_ranges = brin_parser.parse_csv_file(args.input, start=args.after, match_type=match_type)
         logging.info("computing overlap...")
         overlap = brin_overlap.compute_overlap(block_ranges)
         if args.after is None:
@@ -65,6 +67,11 @@ if __name__ == "__main__":
         type=datetime.fromisoformat,
         help="Only show BRs after this point. Only applicable for CSV input.",
     )
+    parser.add_argument(
+        "-overlap",
+        action="store_true",
+        help="Makes -after 'inclusive' - returns blocks that include partial data.",
+    )
     parser.add_argument("-o", dest="output", help="output SVG file")
     parser.add_argument(
         "-w",
@@ -97,4 +104,6 @@ if __name__ == "__main__":
         "-v", type=int, default=1, choices=[0, 1, 2], help="logging verbosity"
     )
     args = parser.parse_args()
+    if args.overlap and args.after is None:
+        raise ValueError("must include -after if passing -overlap")
     main(args)
