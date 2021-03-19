@@ -4,11 +4,13 @@
 """What's the distribution of the block range time span?"""
 
 import argparse
+import logging
 from datetime import datetime
 from typing import Optional
 
 from matplotlib import pyplot as plt
 
+import brin_filenames
 from brin_parser import BlockRange, parse_csv_file
 
 
@@ -33,15 +35,20 @@ def plot_span_hist(
 
 
 def main(args):
+    logging.basicConfig(level=logging.INFO)
     brs = parse_csv_file(args.input, start=args.after)
-    plot_span_hist(brs, args.output, args.log, args.xlim, args.ylim)
+    outfile = args.output or brin_filenames.timespan_hist_from_brinexport_csv(
+        args.input, args.after
+    )
+    logging.info(f"writing timespan histogram to {outfile}")
+    plot_span_hist(brs, outfile, args.log, args.xlim, args.ylim)
 
 
 #%%
 if __name__ == "__main__":
     p = argparse.ArgumentParser()
     p.add_argument("-i", dest="input", required=True, help="input path to CSV")
-    p.add_argument("-o", dest="output", required=True, help="output path for histogram")
+    p.add_argument("-o", dest="output", help="output path for histogram")
     p.add_argument(
         "-after",
         type=datetime.fromisoformat,
