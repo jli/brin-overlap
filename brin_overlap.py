@@ -22,7 +22,6 @@ from brin_parser import parse_csv_file
 @dataclass_json
 @dataclass
 class BrinOverlap:
-    # TODO: more than datetime..
     min_val: datetime
     max_val: datetime
     min_blknum: int

@@ -4,9 +4,9 @@ from __future__ import annotations
 import csv
 import re
 from datetime import datetime
-from typing import Iterable, Optional
+from typing import Iterable, Literal, Optional
 
-from brin_lib import BlockRange
+from brin_lib import BlockRange, date_match
 
 
 DT_TUPLE_REX = re.compile(
@@ -30,6 +30,7 @@ def parse_csv_rows(
     csv_rows: Iterable[str],
     start: Optional[datetime] = None,
     end: Optional[datetime] = None,
+    match_type: Literal["overlap", "within"] = "overlap",
 ) -> list[BlockRange]:
     reader = csv.reader(csv_rows)
     brs = []
@@ -39,26 +40,22 @@ def parse_csv_rows(
             continue
         blknum, value = row
         br = BlockRange(int(blknum), *parse_datetime_tuple(value))
-        if within_dates(br, start, end):
+        if date_match(br, match_type, start, end):
             brs.append(br)
-    # note: i expected this to be sorted already, but it's not! this makes the
-    # viz look much nicer.
+    # note: not sorted because bug in export_brin_items.sh sorting different
+    # files. sorting makes viz look much nicer.
     brs = sorted(brs, key=lambda br: br.blknum)
     return brs
 
 
 def parse_csv_file(
-    filepath: str, start: Optional[datetime] = None, end: Optional[datetime] = None
+    filepath: str,
+    start: Optional[datetime] = None,
+    end: Optional[datetime] = None,
+    match_type: Literal["overlap", "within"] = "overlap",
 ) -> list[BlockRange]:
     with open(filepath) as f:
-        return parse_csv_rows(f, start, end)
-
-
-def within_dates(
-    br: BlockRange, start: Optional[datetime], end: Optional[datetime]
-) -> bool:
-    """Test that the block range is contained within start and end."""
-    return (start is None or start <= br.start) and (end is None or br.end <= end)
+        return parse_csv_rows(f, start, end, match_type)
 
 
 #%%
