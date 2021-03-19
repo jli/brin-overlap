@@ -11,14 +11,14 @@ from brin_overlap import BrinOverlap
 from brin_parser import BlockRange
 
 DEFAULT_WIDTH = 5000
-DEFAULT_NUM_TICKS = 50
 DEFAULT_BLOCK_HEIGHT = 8
 DEFAULT_COLORMAP = "RdYlGn"
 HGAP = 2  # gap between blocks on the same level
 VGAP = 2  # gap between levels
-APPROX_DATE_TICK_WIDTH = 40
-CANVAS_MARGIN = 20  # roughly date tick width / 2
-DATE_FONT_SIZE = 8
+APPROX_DATE_TICK_WIDTH = 60
+DATE_FONT_SIZE = 14
+CANVAS_MARGIN = DATE_FONT_SIZE * 2.5
+TICK_LENGTH = 10  # manually tweaked to look good
 
 
 def _br_frac(blknum: int, min_blknum: int, max_blknum: int) -> float:
@@ -181,8 +181,7 @@ def svg(
         x = interpx(dt) + CANVAS_MARGIN
         # y = font size because multi-line string.
         d.append(draw.Text(text, DATE_FONT_SIZE, x, DATE_FONT_SIZE, center=True))
-        # -6 is magic number (hack)
-        d.append(draw.Line(x, CANVAS_MARGIN, x, CANVAS_MARGIN - 6, stroke="black"))
+        d.append(draw.Line(x, CANVAS_MARGIN, x, CANVAS_MARGIN - TICK_LENGTH, stroke="black"))
 
     if outfile:
         print(f"saving to {outfile}")
