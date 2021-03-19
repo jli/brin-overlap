@@ -1,6 +1,7 @@
-from bro_relevant_blocks import block_range_contains
 from datetime import datetime
-from brin_parser import BlockRange
+
+from brin_lib import BlockRange
+from bro_relevant_blocks import block_range_contains
 
 ts = datetime.fromtimestamp
 

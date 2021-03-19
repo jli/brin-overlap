@@ -8,7 +8,8 @@ import math
 from datetime import datetime
 from typing import Optional
 
-from brin_parser import BlockRange, parse_csv_file
+from brin_lib import BlockRange
+from brin_parser import parse_csv_file
 
 
 def block_range_contains(br: BlockRange, dt: datetime, dt_end: Optional[datetime]) -> bool:

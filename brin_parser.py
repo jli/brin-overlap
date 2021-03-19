@@ -3,25 +3,10 @@ from __future__ import annotations
 
 import csv
 import re
-from dataclasses_json import dataclass_json
-from dataclasses import dataclass
 from datetime import datetime
 from typing import Iterable, Optional
 
-
-# TODO: handle non-datetime values
-@dataclass_json
-@dataclass
-class BlockRange:
-    blknum: int
-    start: datetime
-    end: datetime
-
-    def __repr__(self):
-        def t(dt):
-            return dt.strftime("%Y%m%d %H:%M:%S")
-
-        return f"BR({self.blknum}, {t(self.start)}..{t(self.end)})"
+from brin_lib import BlockRange
 
 
 DT_TUPLE_REX = re.compile(

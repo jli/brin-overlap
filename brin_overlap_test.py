@@ -1,7 +1,8 @@
 from __future__ import annotations
+
 from datetime import datetime
 
-from brin_parser import BlockRange
+from brin_lib import BlockRange
 from brin_overlap import compute_overlap, find_position, try_insert
 
 

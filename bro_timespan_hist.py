@@ -11,7 +11,8 @@ from typing import Optional
 from matplotlib import pyplot as plt
 
 import brin_filenames
-from brin_parser import BlockRange, parse_csv_file
+from brin_lib import BlockRange
+from brin_parser import parse_csv_file
 
 
 def plot_span_hist(

@@ -13,8 +13,9 @@ from typing import Optional
 
 from dataclasses_json import dataclass_json
 
-from brin_parser import BlockRange, parse_csv_file
 import brin_filenames
+from brin_lib import BlockRange
+from brin_parser import parse_csv_file
 
 
 # NOTE: there's some kooky timezone stuff happening when round-tripping JSON...

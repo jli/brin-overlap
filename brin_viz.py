@@ -1,14 +1,13 @@
 #%%
-from datetime import datetime, timedelta
 import logging
+from datetime import datetime, timedelta
 from typing import Optional
 
 import drawSvg as draw
-from matplotlib import colors
-from matplotlib import cm
+from matplotlib import cm, colors
 
+from brin_lib import BlockRange
 from brin_overlap import BrinOverlap
-from brin_parser import BlockRange
 
 DEFAULT_WIDTH = 5000
 DEFAULT_BLOCK_HEIGHT = 8
