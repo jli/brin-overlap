@@ -8,19 +8,20 @@ import math
 from datetime import datetime
 from typing import Optional
 
-from brin_lib import BlockRange
+from brin_lib import BlockRange, overlaps_dates
 from brin_parser import parse_csv_file
 
 
-def block_range_contains(br: BlockRange, dt: datetime, dt_end: Optional[datetime]) -> bool:
+def block_range_matches(br: BlockRange, dt: datetime, dt_end: Optional[datetime]) -> bool:
     if dt_end is None:
         return br.start <= dt and dt <= br.end
     dt_start = dt
-    return br.start <= dt_end and dt_start <= br.end
+    return overlaps_dates(br, dt_start, dt_end)
+    # return br.start <= dt_end and dt_start <= br.end
 
 
 def filter_dt(block_ranges: list[BlockRange], dt: datetime, dt_end: Optional[datetime]) -> list[BlockRange]:
-    return [br for br in block_ranges if block_range_contains(br, dt, dt_end)]
+    return [br for br in block_ranges if block_range_matches(br, dt, dt_end)]
 
 
 def br_with_span(br: BlockRange) -> str:
