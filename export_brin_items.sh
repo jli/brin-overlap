@@ -1,5 +1,7 @@
 #!/bin/bash
 
+# TODO: could probably make this way more efficient with better queries.
+
 set -eu -o pipefail
 
 PGHOST=${PGHOST:-localhost}
@@ -9,7 +11,7 @@ ATTNUM=${ATTNUM:-1}
 [ -z ${PGPASSWORD+x} ] && echo "missing required env var PGPASSWORD" && exit 1
 [ -z ${PGIDX+x} ] && echo "missing required env var PGIDX" && exit 1
 FIRSTPAGE=${FIRSTPAGE:-0}  # first page to start searching for regular pages
-OUTFILE=${OUTFILE:-brinitems_$(date "+%Y%m%d_%H%M%S").csv}
+OUTFILE=${OUTFILE:-brinexport_$(date "+%Y%m%d_%H%M%S").csv}
 
 echo "=> connecting to host $PGHOST db $PGDB as $PGUSER."
 echo "=> exporting attname $ATTNUM from $PGIDX to $OUTFILE."
