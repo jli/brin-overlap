@@ -175,12 +175,17 @@ def svg(
         # if prev_date != dt.date():
         #     text.append(dt.strftime("%Y-%m-%d"))
         # text.append(dt.strftime("%H:%M"))
-        text = ["" if prev_date == dt.date() else dt.strftime("%Y-%m-%d"), dt.strftime("%H:%M")]
+        text = [
+            "" if prev_date == dt.date() else dt.strftime("%Y-%m-%d"),
+            dt.strftime("%H:%M"),
+        ]
         prev_date = dt.date()
         x = interpx(dt) + CANVAS_MARGIN
         # y = font size because multi-line string.
         d.append(draw.Text(text, DATE_FONT_SIZE, x, DATE_FONT_SIZE, center=True))
-        d.append(draw.Line(x, CANVAS_MARGIN, x, CANVAS_MARGIN - TICK_LENGTH, stroke="black"))
+        d.append(
+            draw.Line(x, CANVAS_MARGIN, x, CANVAS_MARGIN - TICK_LENGTH, stroke="black")
+        )
 
     if outfile:
         print(f"saving to {outfile}")

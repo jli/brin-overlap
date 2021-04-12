@@ -63,10 +63,11 @@ def viz_svg_from_brinexport_csv(brinexport_csv: str, after: Optional[datetime]) 
     return outpath
 
 
-def timespan_hist_from_brinexport_csv(brinexport_csv: str, after: Optional[datetime]) -> str:
+def timespan_hist_from_brinexport_csv(
+    brinexport_csv: str, after: Optional[datetime]
+) -> str:
     pathparts = _get_pathparts(brinexport_csv, ".csv")
     outbase = pathparts.base.replace("brinexport_", "timespanhist_")
     outpath = os.path.join(pathparts.dirname, outbase + _after_part(after) + ".png")
     _check_exists(outpath)
     return outpath
-

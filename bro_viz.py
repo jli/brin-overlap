@@ -37,8 +37,12 @@ def main(args: Args) -> None:
             outfile = brin_filenames.viz_svg_from_brinexport_csv(args.input, args.after)
         logging.info("reading input CSV...")
         # By default, use "within" for smaller viz's when filtering with -after.
-        match_type: Literal["overlap", "within"] = "overlap" if args.overlap else "within"
-        block_ranges = brin_parser.parse_csv_file(args.input, start=args.after, match_type=match_type)
+        match_type: Literal["overlap", "within"] = (
+            "overlap" if args.overlap else "within"
+        )
+        block_ranges = brin_parser.parse_csv_file(
+            args.input, start=args.after, match_type=match_type
+        )
         logging.info("computing overlap...")
         overlap = brin_overlap.compute_overlap(block_ranges)
         if args.after is None:

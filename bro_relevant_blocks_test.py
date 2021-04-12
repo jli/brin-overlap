@@ -5,6 +5,7 @@ from bro_relevant_blocks import block_range_matches
 
 ts = datetime.fromtimestamp
 
+
 def test_block_range_matches_point() -> None:
     br = BlockRange(1, ts(10), ts(20))
     assert block_range_matches(br, ts(15), None)
@@ -12,6 +13,7 @@ def test_block_range_matches_point() -> None:
     assert block_range_matches(br, ts(20), None)
     assert not block_range_matches(br, ts(9), None)
     assert not block_range_matches(br, ts(21), None)
+
 
 def test_block_range_matches_range() -> None:
     br = BlockRange(1, ts(10), ts(20))
