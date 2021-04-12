@@ -10,7 +10,7 @@ def blknums(brs: list[BlockRange]) -> list[int]:
     return [br.blknum for br in brs]
 
 
-def test_find_position():
+def test_find_position() -> None:
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
     c = BlockRange(3, datetime.fromtimestamp(5), datetime.fromtimestamp(6))
@@ -19,7 +19,7 @@ def test_find_position():
     assert find_position([a, b], c) == 2
 
 
-def test_find_position_equal_endpoints():
+def test_find_position_equal_endpoints() -> None:
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(2), datetime.fromtimestamp(3))
     c = BlockRange(3, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
@@ -28,7 +28,7 @@ def test_find_position_equal_endpoints():
     assert find_position([a, b], c) == 2
 
 
-def test_find_position_overlap():
+def test_find_position_overlap() -> None:
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
     ab = BlockRange(3, datetime.fromtimestamp(2), datetime.fromtimestamp(4))
@@ -36,7 +36,7 @@ def test_find_position_overlap():
     assert find_position([a, ab], b) is None
 
 
-def test_try_insert():
+def test_try_insert() -> None:
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
     c = BlockRange(3, datetime.fromtimestamp(5), datetime.fromtimestamp(6))
@@ -51,7 +51,7 @@ def test_try_insert():
     assert blknums(level) == [1, 2, 3]
 
 
-def test_try_insert_fail():
+def test_try_insert_fail() -> None:
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
     ab1 = BlockRange(3, datetime.fromtimestamp(1), datetime.fromtimestamp(4))
@@ -63,11 +63,11 @@ def test_try_insert_fail():
     assert not try_insert(levels, ab3)
 
 
-def test_try_insert_edge():
+def test_try_insert_edge() -> None:
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
     # empty list
-    level = []
+    level: list[BlockRange] = []
     assert try_insert(level, a)
     assert blknums(level) == [1]
     # insert before first element
@@ -80,7 +80,7 @@ def test_try_insert_edge():
     assert blknums(level) == [1, 2]
 
 
-def test_compute_overlap_ordered():
+def test_compute_overlap_ordered() -> None:
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
     c = BlockRange(3, datetime.fromtimestamp(5), datetime.fromtimestamp(6))
@@ -94,7 +94,7 @@ def test_compute_overlap_ordered():
     assert blknums(bro.levels[0]) == [1, 2, 3, 4]
 
 
-def test_compute_overlap_overlap():
+def test_compute_overlap_overlap() -> None:
     a = BlockRange(1, datetime.fromtimestamp(1), datetime.fromtimestamp(2))
     b = BlockRange(2, datetime.fromtimestamp(3), datetime.fromtimestamp(4))
     c = BlockRange(3, datetime.fromtimestamp(3), datetime.fromtimestamp(4))

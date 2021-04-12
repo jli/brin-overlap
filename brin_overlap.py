@@ -38,7 +38,7 @@ def read_overlap_file(filepath: str) -> BrinOverlap:
         return BrinOverlap.from_json(f.read())  # type: ignore
 
 
-def write_overlap_file(bro: BrinOverlap, path: str):
+def write_overlap_file(bro: BrinOverlap, path: str) -> None:
     with open(path, "w") as f:
         f.write(bro.to_json(indent=1))  # type: ignore
         f.write("\n")
@@ -99,7 +99,7 @@ def compute_overlap(block_ranges: list[BlockRange]) -> BrinOverlap:
     return bro
 
 
-def print_bro(bro: BrinOverlap):
+def print_bro(bro: BrinOverlap) -> None:
     print("BrinOverlap min:", bro.min_val)
     print("            max:", bro.max_val)
     print("     num levels:", len(bro.levels))

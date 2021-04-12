@@ -5,6 +5,7 @@
 import argparse
 from datetime import datetime
 import logging
+from typing import Literal, NamedTuple, Optional, cast
 
 import brin_filenames
 import brin_overlap
@@ -16,7 +17,18 @@ def _v_to_level(i: int) -> int:
     return {0: logging.CRITICAL, 1: logging.INFO, 2: logging.DEBUG}[i]
 
 
-def main(args):
+class Args(NamedTuple):
+    input: str
+    after: Optional[datetime]
+    overlap: Optional[bool]
+    output: Optional[str]
+    width: float
+    num_ticks: Optional[int]
+    colormap: Optional[str]
+    v: Literal[1, 2, 3]
+
+
+def main(args: Args) -> None:
     logging.basicConfig(level=_v_to_level(args.v))
 
     outfile = args.output
@@ -25,7 +37,7 @@ def main(args):
             outfile = brin_filenames.viz_svg_from_brinexport_csv(args.input, args.after)
         logging.info("reading input CSV...")
         # By default, use "within" for smaller viz's when filtering with -after.
-        match_type = "overlap" if args.overlap else "within"
+        match_type: Literal["overlap", "within"] = "overlap" if args.overlap else "within"
         block_ranges = brin_parser.parse_csv_file(args.input, start=args.after, match_type=match_type)
         logging.info("computing overlap...")
         overlap = brin_overlap.compute_overlap(block_ranges)
@@ -103,7 +115,7 @@ if __name__ == "__main__":
     parser.add_argument(
         "-v", type=int, default=1, choices=[0, 1, 2], help="logging verbosity"
     )
-    args = parser.parse_args()
+    args = cast(Args, parser.parse_args())
     if args.overlap and args.after is None:
         raise ValueError("must include -after if passing -overlap")
     main(args)

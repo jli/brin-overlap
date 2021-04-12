@@ -21,7 +21,7 @@ def plot_span_hist(
     log: bool,
     xlim: Optional[float],
     ylim: Optional[float],
-):
+) -> None:
     deltas = (br.end - br.start for br in brs)
     hours = [d.total_seconds() / 3600 for d in deltas]
     plt.hist(hours, 50, log=log)
@@ -33,16 +33,6 @@ def plot_span_hist(
         plt.ylim(top=ylim)
     if outfile:
         plt.savefig(outfile)
-
-
-def main(args):
-    logging.basicConfig(level=logging.INFO)
-    brs = parse_csv_file(args.input, start=args.after)
-    outfile = args.output or brin_filenames.timespan_hist_from_brinexport_csv(
-        args.input, args.after
-    )
-    logging.info(f"writing timespan histogram to {outfile}")
-    plot_span_hist(brs, outfile, args.log, args.xlim, args.ylim)
 
 
 #%%
@@ -61,4 +51,11 @@ if __name__ == "__main__":
     p.add_argument("-x", dest="xlim", type=float, help="set x limit")
     p.add_argument("-y", dest="ylim", type=float, help="set y limit")
     args = p.parse_args()
-    main(args)
+
+    logging.basicConfig(level=logging.INFO)
+    brs = parse_csv_file(args.input, start=args.after)
+    outfile = args.output or brin_filenames.timespan_hist_from_brinexport_csv(
+        args.input, args.after
+    )
+    logging.info(f"writing timespan histogram to {outfile}")
+    plot_span_hist(brs, outfile, args.log, args.xlim, args.ylim)

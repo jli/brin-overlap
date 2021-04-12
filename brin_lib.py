@@ -12,8 +12,8 @@ class BlockRange:
     start: datetime
     end: datetime
 
-    def __repr__(self):
-        def t(dt):
+    def __repr__(self) -> str:
+        def t(dt: datetime) -> str:
             return dt.strftime("%Y%m%d %H:%M:%S")
 
         return f"BR({self.blknum}, {t(self.start)}..{t(self.end)})"

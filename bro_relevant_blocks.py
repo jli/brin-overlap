@@ -12,7 +12,9 @@ from brin_lib import BlockRange, overlaps_dates
 from brin_parser import parse_csv_file
 
 
-def block_range_matches(br: BlockRange, dt: datetime, dt_end: Optional[datetime]) -> bool:
+def block_range_matches(
+    br: BlockRange, dt: datetime, dt_end: Optional[datetime]
+) -> bool:
     if dt_end is None:
         return br.start <= dt and dt <= br.end
     dt_start = dt
@@ -20,19 +22,23 @@ def block_range_matches(br: BlockRange, dt: datetime, dt_end: Optional[datetime]
     # return br.start <= dt_end and dt_start <= br.end
 
 
-def filter_dt(block_ranges: list[BlockRange], dt: datetime, dt_end: Optional[datetime]) -> list[BlockRange]:
+def filter_dt(
+    block_ranges: list[BlockRange], dt: datetime, dt_end: Optional[datetime]
+) -> list[BlockRange]:
     return [br for br in block_ranges if block_range_matches(br, dt, dt_end)]
 
 
 def br_with_span(br: BlockRange) -> str:
-    def t(dt):
+    def t(dt: datetime) -> str:
         return datetime.strftime(dt, "%Y%m%d %H:%M")
 
     span = str(br.end - br.start)
     return f"BR({br.blknum}, {t(br.start)}..{t(br.end)})  {span}"
 
 
-def stats(brs: list[BlockRange], dt: datetime, dt_end: Optional[datetime], num_rows: int):
+def stats(
+    brs: list[BlockRange], dt: datetime, dt_end: Optional[datetime], num_rows: int
+) -> None:
     rel_brs = filter_dt(brs, dt, dt_end)
     print(
         f"num relevant block ranges: {len(rel_brs)}. {len(rel_brs)/len(brs)*100:.1f}% (of {len(brs)})"

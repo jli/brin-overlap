@@ -24,7 +24,7 @@ def _get_pathparts(inpath: str, expected_ext: Optional[str] = None) -> _PathPart
     return _PathParts(dirname, inbase, inext.lower())
 
 
-def _check_exists(path: str):
+def _check_exists(path: str) -> None:
     if os.path.exists(path):
         raise ValueError(f"inferred output path already exists: {path}")
 

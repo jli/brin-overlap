@@ -116,7 +116,7 @@ def svg(
     block_height: float = DEFAULT_BLOCK_HEIGHT,
     num_ticks: Optional[int] = None,
     colormap: Optional[str] = DEFAULT_COLORMAP,
-):
+) -> draw.Drawing:
     full_width = width
     del width  # avoid confusion
     # without margin, the bottom stroke border looks funky for some reason.

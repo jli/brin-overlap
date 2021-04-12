@@ -5,7 +5,7 @@ from brin_lib import BlockRange, date_match, fully_within_dates, overlaps_dates
 ts = datetime.fromtimestamp
 
 
-def test_fully_within_dates():
+def test_fully_within_dates() -> None:
     br = BlockRange(1, ts(10), ts(20))
     assert fully_within_dates(br, None, None)
     assert fully_within_dates(br, ts(9), None)
@@ -21,7 +21,7 @@ def test_fully_within_dates():
     assert not fully_within_dates(br, ts(11), ts(19))
 
 
-def test_fully_within_dates_edge():
+def test_fully_within_dates_edge() -> None:
     br = BlockRange(1, ts(10), ts(20))
     assert fully_within_dates(br, ts(10), None)
     assert fully_within_dates(br, None, ts(20))
@@ -29,7 +29,7 @@ def test_fully_within_dates_edge():
 
 
 # These test cases match test_fully_within_dates.
-def test_overlaps_dates():
+def test_overlaps_dates() -> None:
     br = BlockRange(1, ts(10), ts(20))
     # fully within, so naturally also overlaps.
     assert overlaps_dates(br, None, None)
@@ -46,7 +46,7 @@ def test_overlaps_dates():
     assert overlaps_dates(br, ts(15), ts(17))
 
 
-def test_overlaps_dates_fails():
+def test_overlaps_dates_fails() -> None:
     br = BlockRange(1, ts(10), ts(20))
     assert not overlaps_dates(br, ts(1), ts(5))
     assert not overlaps_dates(br, ts(50), ts(100))
@@ -54,7 +54,7 @@ def test_overlaps_dates_fails():
     assert not overlaps_dates(br, ts(50), None)
 
 
-def test_overlaps_dates_edge():
+def test_overlaps_dates_edge() -> None:
     br = BlockRange(1, ts(10), ts(20))
     # Same as test_fully_within_dates_edge cases.
     assert overlaps_dates(br, ts(10), None)
@@ -64,7 +64,7 @@ def test_overlaps_dates_edge():
     assert overlaps_dates(br, ts(20), None)
 
 
-def test_date_match():
+def test_date_match() -> None:
     br = BlockRange(1, ts(10), ts(20))
     assert date_match(br, "overlap", ts(5), ts(15))
     assert not date_match(br, "within", ts(5), ts(15))
