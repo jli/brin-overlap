@@ -7,23 +7,23 @@ set -eu -o pipefail
 PGHOST=${PGHOST:-localhost}
 PGUSER=${PGUSER:-postgres}
 ATTNUM=${ATTNUM:-1}
-[ -z ${PGDB+x} ] && echo "missing required env var PGDB" && exit 1
+[ -z ${PGDATABASE+x} ] && echo "missing required env var PGDATABASE" && exit 1
 [ -z ${PGPASSWORD+x} ] && echo "missing required env var PGPASSWORD" && exit 1
 [ -z ${PGIDX+x} ] && echo "missing required env var PGIDX" && exit 1
 FIRSTPAGE=${FIRSTPAGE:-0}  # first page to start searching for regular pages
 OUTFILE=${OUTFILE:-brinexport_$(date "+%Y%m%d_%H%M%S").csv}
 
-echo "=> connecting to host $PGHOST db $PGDB as $PGUSER."
+echo "=> connecting to host $PGHOST db $PGDATABASE as $PGUSER."
 echo "=> exporting attname $ATTNUM from $PGIDX to $OUTFILE."
 
 function load_extension {
     # if fails, most likely because it was already loaded
-    psql -h "$PGHOST" -d "$PGDB" -U "$PGUSER" -X -c "CREATE EXTENSION pageinspect" || true
+    psql -h "$PGHOST" -d "$PGDATABASE" -U "$PGUSER" -X -c "CREATE EXTENSION pageinspect" || true
 }
 
 function unload_extension {
     echo "-> unloading pageinspect..."
-    psql -h "$PGHOST" -d "$PGDB" -U "$PGUSER" -X -c "DROP EXTENSION pageinspect"
+    psql -h "$PGHOST" -d "$PGDATABASE" -U "$PGUSER" -X -c "DROP EXTENSION pageinspect"
 }
 
 tmp=$(mktemp -d tmp-export_brin_items.XX)
@@ -36,7 +36,7 @@ trap 'cleanup' EXIT
 # Return type of page number.
 function get_page_type {
     PAGE="$1"
-    psql -h "$PGHOST" -d "$PGDB" -U "$PGUSER" --csv -t -X \
+    psql -h "$PGHOST" -d "$PGDATABASE" -U "$PGUSER" --csv -t -X \
         -c "SELECT brin_page_type(get_raw_page('$PGIDX', $PAGE))"
 }
 
@@ -56,7 +56,7 @@ function export_page {
         ORDER_COLS="blknum"
     fi
     # -t to suppress headers, -X to not load .psql (suppress \timing output)
-    if psql -h "$PGHOST" -d "$PGDB" -U "$PGUSER" --csv -t -X \
+    if psql -h "$PGHOST" -d "$PGDATABASE" -U "$PGUSER" --csv -t -X \
         -c "SELECT $COLS FROM brin_page_items(get_raw_page('$PGIDX', $PAGE), '$PGIDX') $WHERE ORDER BY $ORDER_COLS" \
         > "$PAGE_OUTFILE"; then
         echo "good"
